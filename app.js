@@ -6,6 +6,8 @@ var errorHandler = require('errorhandler');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var HttpError = require('./error').HttpError;
 
 
 
@@ -18,14 +20,40 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+// app.use(session({
+// 	"secret": config.get('session:secret'),
+// 	"key": config.get('session:sid'),
+// 	"cookie": {
+// 		"path": "/",
+// 		"httpOnly": true,
+// 		"maxAge": null
+// 	}
+// }));
+app.use(require('./middleware/sendHttpError'));
+require('./routes')(app);
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+app.use((err, req, res, next) => {
+	if(typeof err == 'number'){
+		err = new HttpError(err);
+	}
+
+	if(err instanceof HttpError){
+		res.sendHttpError(err);
+	}else{
+		if(app.get('env') == 'development'){
+			errorHandler(err, req, res, next);
+		}else{
+			logger(err);
+			err = new HttpError(500);
+			res.sendHttpError(err);
+		}
+	}
+});
 
 if(app.get('env') == 'development'){
 	app.use(errorHandler());
 }
 
-app.get('/', (req, res, next) => {
-	res.render('index')
-});
 module.exports = app;

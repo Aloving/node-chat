@@ -9,5 +9,9 @@
 				}
 			}
 		}
-	}
+	},
+	"session": {
+		"secret": "killerFeature",
+		"key": "sid" 
+	} 
 }

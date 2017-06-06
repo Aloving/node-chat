@@ -1,12 +1,34 @@
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/test');
+var mongoose = require('./libs/mongoose');
+var User = require('./models/user').User;
 
-var Cat = mongoose.model('Cat', { name: String });
+function open(){
+	return new Promise((resolve, reject) => {
+		mongoose.connection.on('open', resolve);
+	});
+}
 
-var kitty = new Cat({
- name: 'Zildjian' 
-});
+function dropDb() {
+	var db = mongoose.connection.db;
+	return new Promise((resolve, reject) => db.dropDatabase(resolve));
+}
 
-kitty.save()
-	.then(res => console.log(res))
-	.catch(err => console.log(err));
+function createUsers(){
+	require('./models/user');
+	var vasya = new User({username: 'Вася', password: 'supervasya'});
+	var petya = new User({username: 'Вася', password: 'superpetya'});
+	var admin = new User({username: 'admin', password: 'admin'});
+	return Promise.all([
+		vasya.save(),
+		petya.save(),
+		admin.save()
+	])
+}
+
+	open()
+		.then(dropDb)
+		.then(createUsers)
+		.then(result => {
+			console.log(result);
+		})
+		.catch(err => console.log(err))
+		.then(() => mongoose.disconnect());
