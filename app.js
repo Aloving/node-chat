@@ -7,6 +7,10 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+var mongoose = require('./libs/mongoose');
+var mongoose_store = new MongoStore({mongooseConnection: mongoose.connection});
+var config = require('./config');
 var HttpError = require('./error').HttpError;
 
 
@@ -20,18 +24,22 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(session({
-// 	"secret": config.get('session:secret'),
-// 	"key": config.get('session:sid'),
-// 	"cookie": {
-// 		"path": "/",
-// 		"httpOnly": true,
-// 		"maxAge": null
-// 	}
-// }));
+app.use(session({
+	secret: config.get('session:secret'),
+	key: config.get('session:sid'),
+	cookie: config.get('session:cookie'),
+	saveUninitialized: false,
+  resave: false,
+  store: mongoose_store
+}));
+app.use(function(req, res, next){
+	req.session.numberOfVisits = req.session.numberOfVisits +1 || 1;
+	res.send(`Visits ${req.session.numberOfVisits}`);
+});
 app.use(require('./middleware/sendHttpError'));
 require('./routes')(app);
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 app.use((err, req, res, next) => {

@@ -14,6 +14,14 @@ module.exports = function(app){
 	});
 
 	app.get('/user/:id', (req, res, next) => {
+		
+		try {
+			var id = new ObjectID(req.params.id);
+		} catch(e) {
+			next(404);
+			return;
+		}
+
 		User.findById(req.params.id, (err, user) => {
 			if(err) next(err);
 			if(!user) {

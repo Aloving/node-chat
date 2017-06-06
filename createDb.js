@@ -15,7 +15,7 @@ function dropDb() {
 function createUsers(){
 	require('./models/user');
 	var vasya = new User({username: 'Вася', password: 'supervasya'});
-	var petya = new User({username: 'Вася', password: 'superpetya'});
+	var petya = new User({username: 'Петя', password: 'superpetya'});
 	var admin = new User({username: 'admin', password: 'admin'});
 	return Promise.all([
 		vasya.save(),

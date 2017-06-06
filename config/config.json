@@ -12,6 +12,11 @@
 	},
 	"session": {
 		"secret": "killerFeature",
-		"key": "sid" 
+		"key": "sid", 
+		"cookie": {
+			"path": "/",
+			"httpOnly": true,
+			"maxAge": null
+		}
 	} 
 }
