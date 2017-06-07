@@ -1,33 +1,13 @@
-var User = require('../models/user').User;
-var HttpError = require('../error').HttpError;
+var checkAuth =  require('../middleware/checkAuth');
 
 module.exports = function(app){
-	app.get('/', (req, res, next) => {
-		res.render('index')
-	});
+	app.get('/', require('./frontpage').get);
 
-	app.get('/users', (req, res, next) => {
-		User.find({}, (err, users) => {
-			if(err) return next(err);
-			res.json(users);
-		});
-	});
+	app.get('/login', require('./login').get);
+	app.post('/login', require('./login').post);
+	app.post('/logout', require('./logout').post);
 
-	app.get('/user/:id', (req, res, next) => {
-		
-		try {
-			var id = new ObjectID(req.params.id);
-		} catch(e) {
-			next(404);
-			return;
-		}
 
-		User.findById(req.params.id, (err, user) => {
-			if(err) next(err);
-			if(!user) {
-				next(new HttpError(404, "User not found"));
-			}
-			res.json(user);
-		});
-	});
+	app.get('/chat', checkAuth, require('./chat').get);
+
 }

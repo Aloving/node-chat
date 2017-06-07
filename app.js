@@ -32,11 +32,8 @@ app.use(session({
   resave: false,
   store: mongoose_store
 }));
-app.use(function(req, res, next){
-	req.session.numberOfVisits = req.session.numberOfVisits +1 || 1;
-	res.send(`Visits ${req.session.numberOfVisits}`);
-});
 app.use(require('./middleware/sendHttpError'));
+app.use(require('./middleware/loadUser'));
 require('./routes')(app);
 app.use(express.static(path.join(__dirname, 'public')));
 
