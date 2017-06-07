@@ -8,6 +8,8 @@ var app = require('../app');
 var debug = require('debug')('kekapp:server');
 var http = require('http');
 var config = require('../config');
+var logger = require('morgan');
+
 
 /**
  * Get port from environment and store in Express.
@@ -21,16 +23,7 @@ app.set('port', config.get('port'));
  */
 
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
-
-io.sockets.on('connection', function (socket) {
-
-  socket.on('message', function (text, cb) {
-    socket.broadcast.emit('message', text);
-    cb("123");
-  });
-
-});
+require('../socket')(server);
 
 /**
  * Listen on provided port, on all network interfaces.
